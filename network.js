@@ -7,12 +7,39 @@ var link, node, label;
 // the data - an object with nodes and links
 var graph;
 
+//get file selector
+var selected_graph = "graphs/graph.json"
+
 // load the data
-d3.json("graphs/graph.json", function(error, _graph) {
+d3.json(selected_graph, function(error, _graph) {
   if (error) throw error;
   graph = _graph;
   initializeDisplay();
   initializeSimulation();
+});
+
+// Load the data from the selected file
+function loadGraph(file) {
+    var reader = new FileReader();
+    reader.onload = function(event) {
+        //remove all elements from svg_group
+        svg_group.selectAll("*").remove();
+        //remove legend from svg
+        svg.selectAll(".legend").remove();
+
+        graph = JSON.parse(event.target.result);
+        initializeDisplay();
+        initializeSimulation();
+    };
+    reader.readAsText(file);
+}
+
+// Handle file input change
+document.getElementById('fileInput').addEventListener('change', function(event) {
+    var file = event.target.files[0];
+    if (file) {
+        loadGraph(file);
+    }
 });
 
 //////////// FORCE SIMULATION //////////// 
@@ -181,11 +208,13 @@ function initializeDisplay() {
     .enter()
     .append("text")
     .attr("x", function(d) { return d.x; })
-    .attr("y", function(d) { return d.y - 10; }) // Position above the circle
+    .attr("y", function(d) { return d.y; }) // Position above the circle
     .attr("text-anchor", "middle")
     .attr("font-size", "10px")
     .text(function(d) { return d.id; })
     .attr("fill", "black");
+
+ console.log(graph.nodes)
 
   // visualize the graph
   updateDisplay();
@@ -229,8 +258,9 @@ function initializeDisplay() {
         var groupNames = {
             1: "IP",
             2: "Host",
-            3: "Product",
-            4: "ASN"
+            3: "Vulnerability",
+            4: "ASN",
+            5: "Product"
         };
 
         // Append text label with group name
@@ -244,7 +274,6 @@ function initializeDisplay() {
 
 // update the display based on the forces (but not positions)
 function updateDisplay() {
-
     //transform all elements in svg by the transform object
 
     node
@@ -276,7 +305,7 @@ function ticked() {
 
     labels
         .attr("x", function(d) { return d.x; })
-        .attr("y", function(d) { return d.y - 10; }); // Position above the circle
+        .attr("y", function(d) { return d.y; }); // Position above the circle
 
     node
         .attr("cx", function(d) { return d.x; })

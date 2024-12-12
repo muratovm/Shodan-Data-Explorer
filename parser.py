@@ -130,15 +130,17 @@ def convert_json_to_graph(file_name):
             if (element["ip_str"], hostname) not in link_set:
                 graph["links"].append({"source": element["ip_str"], "target": hostname, "value": 1})
                 link_set.add((element["ip_str"], hostname))
-        #add product to nodes if not already in the set
-        if "product" in element: 
-            if element["product"] not in node_set:
-                graph["nodes"].append({"id": element["product"], "group": 3})
-                node_set.add(element["product"])
-            #add ip_str to product links if not already in the set
-            if ("ip_str", element["product"]) not in link_set:
-                graph["links"].append({"source": element["ip_str"], "target": element["product"], "value": 1})
-                link_set.add((element["ip_str"], element["product"]))
+        
+        #add vulnerability to nodes if not already in the set
+        if "vulns" in element:
+            for vuln in element["vulns"]:
+                if vuln not in node_set:
+                    graph["nodes"].append({"id": vuln, "group": 3})
+                    node_set.add(vuln)
+                #add ip_str to vulnerability links if not already in the set
+                if (element["ip_str"], vuln) not in link_set:
+                    graph["links"].append({"source": element["ip_str"], "target": vuln, "value": 1})
+                    link_set.add((element["ip_str"], vuln))
 
         #add asn to nodes if not already in the set
         if "asn" in element:
@@ -150,8 +152,18 @@ def convert_json_to_graph(file_name):
                 graph["links"].append({"source": element["ip_str"], "target": element["asn"], "value": 1})
                 link_set.add((element["ip_str"], element["asn"]))
     
+        #add product to nodes if not already in the set
+        if "product" in element: 
+            if element["product"] not in node_set:
+                graph["nodes"].append({"id": element["product"], "group": 5})
+                node_set.add(element["product"])
+            #add ip_str to product links if not already in the set
+            if ("ip_str", element["product"]) not in link_set:
+                graph["links"].append({"source": element["ip_str"], "target": element["product"], "value": 1})
+                link_set.add((element["ip_str"], element["product"]))
+
     #save graph to json file
-    with open('graph.json', 'w') as f:
+    with open('graphs/graph.json', 'w') as f:
         json.dump(graph, f, indent = 4)
     return "graph.json"
     
